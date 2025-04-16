@@ -1,0 +1,33 @@
+# Ambientes Virtuais
+env/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+
+# Arquivos de configuração do VSCode / IDEs
+.vscode/
+.idea/
+
+#Logs
+*.Logs
+
+# Arquivos de dados
+data/
+*.csv
+*.xlsx
+*.json
+*.sqlite3
+
+# Arquivos temporários de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de ambiente/sensíveis
+.env
+
+# Arquivos de deploy
+*.zip
+*.tar.gz
