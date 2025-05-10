@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 app.config['SWAGGER'] = {
     'title': 'Tech Challeger 1',
-    'uiversion': 1
+    'uiversion': 3
 }
 
 swagger = Swagger(app)
