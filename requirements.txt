@@ -1,8 +1,7 @@
-flask
-flask-httpauth
-pandas
-beautifulsoup4
-requests
-lxml
-flasgger
-sqlalchemy
+fastapi
+uvicorn
+selenium
+python-jose[cryptography]
+pydantic
+SQLAlchemy
+alembic
