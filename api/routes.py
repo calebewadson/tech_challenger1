@@ -1,54 +1,188 @@
-from flask import Flask, jsonify, request
-from flask_httpauth import HTTPBasicAuth
-from scraping.producao import get_producao_data
-from scraping.processamento import get_processamento_data
-from scraping.comercializacao import get_comercializacao_data
-from scraping.exportacao import get_exportacao_data
-from scraping.importacao import get_importacao_data
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from scraping.scraper import fetch_table
+from scraping.cache import load_local_data
+from auth.jwt import verify_token
+from services.db import get_db, Producao, Processamento, Comercializacao, Importacao, Exportacao
 
-auth = HTTPBasicAuth()
+router = APIRouter(
+    prefix="/data",
+    dependencies=[Depends(verify_token)],
+    responses={404: {"descriptions": "Tabela não encontrada"}}
+)
 
-users = {"admin": "admin"}
+# ROTA: /routes/producao
 
-@auth.verify_password
-def verify_password(username, password):
-    if username in users and users[username] == password:
-        return username
+@router.get("/producao", summary="Produção")
+def get_producao(db: Session = Depends(get_db)):
+    try:
+        # Raspagem da taabela
+        rows = fetch_table("Produção")
+        if not rows or len(rows) < 2:
+            raise Exception("Tabela vazia ou não encontrada")
+        
+        # Limpa registros antigos
+        db.query(Producao).delete()
+        db.commit()
 
-def register_routes(app):
-    @app.route('/')
-    def home():
-        return jsonify({"msg": "API Viti Brasil"}), 200
+        # Insere os novos registros
+        for cols in rows[1:]:
+            produto = cols[0].strip()
+            qtd_str = cols[1].strip()
+
+            # Normaliza a string: remove pontos de milhar e troca vírgula por ponto
+            qtd_limpa = qtd_str.replace(".", "").replace(",", ".")
+            try:
+                qtd_numero = float(qtd_limpa)
+            except ValueError:
+                continue
+
+            registro = Producao(produto=produto, quantidade=qtd_numero)
+            db.add(registro)
+
+        db.commit()
+        return rows
     
-    @app.route('/producao')
-    @auth.login_required
-    def producao():
-        df = get_producao_data()
-        return df.to_json(orient='records', force_ascii = False)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tabela não encontrada")
+    except Exception:
+        return load_local_data("Produção")
     
-    @app.route('/processamento')
-    @auth.login_required
-    def processamento():
-        df = get_processamento_data()
-        return df.to_json(orient='records', force_ascii = False)
+# ROTA: /routes/processamento
+
+@router.get("/processamento", summary="Processamento")
+def get_processamento(db: Session = Depends(get_db)):
+    try:
+        rows = fetch_table("Processamento")
+        if not rows or len(rows) < 2:
+            raise Exception("Tabela vazia ou não encontrada")
+        
+        db.query(Processamento).delete()
+        db.commit
+
+        for cols in rows[1:]:
+            produto = cols[0].strip()
+            qtd_str = cols[1].strip()
+
+            qtd_limpa = qtd_str.replace(".", "").replace(",", ".")
+            try:
+                qtd_numero = float(qtd_limpa)
+            except ValueError:
+                continue
+            
+            registro = Processamento(produto=produto, quantidade=qtd_numero)
+            db.add(registro)
+
+        db.commit()
+        return rows
+    
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tabela não encontrada")
+    except Exception:
+        return load_local_data("Processamento")
+    
+# ROTA: /routes/comercializacao
+
+@router.get("/comercializacao", summary="Comercialização")
+def get_comercializacao(db: Session = Depends(get_db)):
+    try:
+        rows = fetch_table("Comercialização")
+        if not rows or len(rows) < 2:
+            raise Exception("Tabela vazia ou não encontrada")
+        
+        db.query(Comercializacao).delete()
+        db.commit()
+
+        for cols in rows[1:]:
+            produto = cols[0].strip()
+            qtd_str = cols[1].strip()
+
+            qtd_limpa = qtd_str.replace(".", "").replace(",", ".")
+            try:
+                qtd_numero = float(qtd_limpa)
+            except ValueError:
+                continue
+
+            registro = Comercializacao(produto=produto, quantidade=qtd_numero)
+            db.add(registro)
+
+        db.commit()
+        return rows
+    
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tabela não encontrada")
+    except Exception:
+        return load_local_data("Comercialização")
+    
+#ROTA: /routes/importacao
+
+@router.get("/importacao", summary="Importação")
+def get_importacao(db: Session = Depends(get_db)):
+    try:
+        rows = fetch_table("Importação")
+        if not rows or len(rows) < 2:
+            raise Exception("Tabela vazia ou não encontrada")
+        
+        db.query(Importacao).delete()
+        db.commit()
+
+        for cols in rows[1:]:
+            pais = cols[0].strip()
+            qtd_str = cols[1].strip()
+            valor_str = cols[2].strip()
+
+            qtd_limpa = qtd_str.replace(".", "").replace(",", ".")
+            valor_limpo = valor_str.replace(".", "").replace(",", ".")
+            try:
+                qtd_numero = float(qtd_limpa)
+                valor_numero  = float(valor_limpo)
+            except ValueError:
+                continue
+
+            registro = Importacao(paises=pais, quantidade=qtd_numero, valor=valor_numero)
+            db.add(registro)
+
+        db.commit()
+        return rows
+    
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tabela não encontrada")
+    except Exception:
+        return load_local_data("Importação")
     
 
-    @app.route('/comercializacao')
-    @auth.login_required
-    def comercializacao():
-        df = get_comercializacao_data()
-        return df.to_json(orient='records', force_ascii = False)
-    
+#ROTA: /routes/exportacao
 
-    @app.route('/exportacao')
-    @auth.login_required
-    def exportacao():
-        df = get_exportacao_data()
-        return df.to_json(orient='records', force_ascii = False)
-    
+@router.get("/exportacao", summary="Exportação")
+def get_exportacao(db: Session = Depends(get_db)):
+    try:
+        rows = fetch_table("Exportação")
+        if not rows or len(rows) < 2:
+            raise Exception("Tabela vazia ou não encontrada")
+        
+        db.query(Exportacao).delete()
+        db.commit()
 
-    @app.route('/importacao')
-    @auth.login_required
-    def importacao():
-        df = get_importacao_data()
-        return df.to_json(orient='records', force_ascii = False)
+        for cols in rows[1:]:
+            pais = cols[0].strip()
+            qtd_str = cols[1].strip()
+            valor_str = cols[2].strip()
+
+            qtd_limpa = qtd_str.replace(".", "").replace(",", ".")
+            valor_limpo = valor_str.replace(".", "").replace(",", ".")
+            try:
+                qtd_numero = float(qtd_limpa)
+                valor_numero = float(valor_limpo)
+            except ValueError:
+                continue
+
+            registro = Exportacao(paises=pais, quantidade=qtd_numero, valor=valor_numero)
+
+        db.commit()
+        return rows
+    
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Tabela não encontrada")
+    except Exception:
+        return load_local_data("Exportação")
+    

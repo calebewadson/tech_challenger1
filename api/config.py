@@ -1,10 +1,14 @@
-class config():
-    SECRET_KEY = 'admin'
-    CACHE_TYPE = 'simple'
-    SWAGGER = {
-        'title': 'Tech Challenger 1',
-        'uiversion': 3
-    }
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///recipes.db'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = 'admin'
+import os
+
+BASE_URL = "http://vitibrasil.cnpuv.embrapa.br/index.php"
+
+# Mapeia o nome da tabela ao parâmetro opção
+ENDPOINTS = {
+    "Produção":         f"{BASE_URL}?opcao=opt_02",
+    "Processamento":    f"{BASE_URL}?opcao=opt_03",
+    "Comercialização":  f"{BASE_URL}?opcao=opt_04",
+    "Importação":       f"{BASE_URL}?opcao=opt_05",
+    "Exportação":       f"{BASE_URL}?opcao=opt_06",
+}
+
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
