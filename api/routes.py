@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from scraping.scraper import fetch_table
-from scraping.cache import load_local_data
+from services.scraper import fetch_table
+from services.cache import load_local_data
 from auth.jwt import verify_token
 from services.db import get_db, Producao, Processamento, Comercializacao, Importacao, Exportacao
 
@@ -10,6 +10,11 @@ router = APIRouter(
     dependencies=[Depends(verify_token)],
     responses={404: {"descriptions": "Tabela não encontrada"}}
 )
+
+@router.get("/", summary="Raiz de /data - exige token")
+def root_data(db: Session = Depends(get_db)):
+    #Rota para o validação do pytest
+    return{"message": "VocÊ está autenticado"}
 
 # ROTA: /routes/producao
 

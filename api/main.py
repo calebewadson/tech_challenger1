@@ -3,7 +3,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from api.routes import router as data_router
 from auth.jwt import create_access_token, verify_token
 from datetime import timedelta
-from services.db import SessionLocal
 
 app = FastAPI(title="Embrapa Wine Data API")
 

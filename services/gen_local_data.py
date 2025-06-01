@@ -1,5 +1,5 @@
 import json
-from scraping.scraper import fetch_all_data
+from services.scraper import fetch_all_data
 from pathlib import Path
 
 if __name__ == "__main__":
