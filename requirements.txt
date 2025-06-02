@@ -5,5 +5,6 @@ python-jose[cryptography]
 pydantic
 SQLAlchemy
 alembic
+pytest
 httpx
 python-multipart

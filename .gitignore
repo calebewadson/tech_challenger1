@@ -24,9 +24,3 @@ Thumbs.db
 # Arquivos de deploy
 *.zip
 *.tar.gz
-
-# arquivos do vercel
-.vercel/
-
-# banco SQLite local
-embrapa.db
