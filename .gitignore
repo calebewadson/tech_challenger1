@@ -14,13 +14,6 @@ __pycache__/
 #Logs
 *.Logs
 
-# Arquivos de dados
-data/
-*.csv
-*.xlsx
-*.json
-*.sqlite3
-
 # Arquivos temporários de sistema
 .DS_Store
 Thumbs.db
