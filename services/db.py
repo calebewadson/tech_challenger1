@@ -50,7 +50,7 @@ class Importacao(Base):
     valor = Column(Float, nullable=False)
     criado_em = Column(DateTime, default=datetime.datetime.utcnow)
 
-def Exportacao(Base):
+class Exportacao(Base):
     __tablename__ = "exportacao"
     id = Column(Integer, primary_key=True, autoincrement=True)
     paises = Column(String(80), nullable=False)
